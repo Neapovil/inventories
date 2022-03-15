@@ -1,0 +1,13 @@
+name: Inventories
+main: com.github.neapovil.inventories.Inventories
+version: 1.0.0
+api-version: 1.13
+author: Neapovil
+website: https://github.com/Neapovil/cooldowns
+depend:
+  - CommandAPI
+permissions:
+  inventories.command:
+    default: true
+  inventories.command.admin:
+    default: op
