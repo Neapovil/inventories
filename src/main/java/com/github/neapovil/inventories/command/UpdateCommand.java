@@ -7,7 +7,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 
-public final class GetCommand
+public final class UpdateCommand
 {
     private static final Inventories plugin = Inventories.getInstance();
 
@@ -15,19 +15,19 @@ public final class GetCommand
     {
         new CommandAPICommand("inventories")
                 .withPermission("inventories.command")
-                .withArguments(new LiteralArgument("get"))
+                .withArguments(new LiteralArgument("update").withPermission("inventories.command.admin"))
                 .withArguments(new StringArgument("name").replaceSuggestions(info -> plugin.getInventories().toArray(String[]::new)))
                 .executesPlayer((player, args) -> {
                     final String name = (String) args[0];
 
                     if (!plugin.exists(name))
                     {
-                        CommandAPI.fail("Inventory " + name + " doesn't exists.");
+                        CommandAPI.fail("Inventory " + name + " doesn't exist");
                     }
 
-                    plugin.setInventory(name, player);
+                    plugin.createInventory(name, player.getInventory());
 
-                    player.sendMessage("Set own inventory to " + name);
+                    player.sendMessage("Inventory " + name + " updated");
                 })
                 .register();
     }

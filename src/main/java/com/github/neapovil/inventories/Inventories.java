@@ -21,6 +21,7 @@ import com.github.neapovil.inventories.command.CreateCommand;
 import com.github.neapovil.inventories.command.DeleteCommand;
 import com.github.neapovil.inventories.command.GetCommand;
 import com.github.neapovil.inventories.command.GiveCommand;
+import com.github.neapovil.inventories.command.UpdateCommand;
 import com.github.neapovil.inventories.util.SerializeInventory;
 
 import net.kyori.adventure.text.Component;
@@ -51,6 +52,7 @@ public final class Inventories extends JavaPlugin implements Listener
         GetCommand.register();
         DeleteCommand.register();
         GiveCommand.register();
+        UpdateCommand.register();
 
         this.getServer().getPluginManager().registerEvents(this, this);
     }

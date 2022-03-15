@@ -6,7 +6,6 @@ import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
-import net.kyori.adventure.text.Component;
 
 public final class DeleteCommand
 {
@@ -28,7 +27,7 @@ public final class DeleteCommand
 
                     plugin.deleteInventory(name);
 
-                    sender.sendMessage(Component.text("Inventory " + name + " deleted"));
+                    sender.sendMessage("Inventory " + name + " deleted");
                 })
                 .register();
     }

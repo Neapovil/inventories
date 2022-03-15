@@ -6,7 +6,6 @@ import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
-import net.kyori.adventure.text.Component;
 
 public final class CreateCommand
 {
@@ -28,7 +27,7 @@ public final class CreateCommand
 
                     plugin.createInventory(name, player.getInventory());
 
-                    player.sendMessage(Component.text("Inventory " + name + " created"));
+                    player.sendMessage("Inventory " + name + " created");
                 })
                 .register();
     }

@@ -9,7 +9,6 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.PlayerArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
-import net.kyori.adventure.text.Component;
 
 public final class GiveCommand
 {
@@ -33,7 +32,7 @@ public final class GiveCommand
 
                     plugin.setInventory(name, player1);
 
-                    player.sendMessage(Component.text("Gave inventory " + name + " to " + player1.getName()));
+                    player.sendMessage("Gave inventory " + name + " to " + player1.getName());
                 })
                 .register();
     }
