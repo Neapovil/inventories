@@ -3,7 +3,7 @@ main: com.github.neapovil.inventories.Inventories
 version: 1.0.0
 api-version: 1.13
 author: Neapovil
-website: https://github.com/Neapovil/cooldowns
+website: https://github.com/Neapovil/inventories
 depend:
   - CommandAPI
 permissions:
