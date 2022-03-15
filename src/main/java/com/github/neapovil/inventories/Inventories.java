@@ -34,6 +34,8 @@ public final class Inventories extends JavaPlugin implements Listener
 {
     private static Inventories instance;
     private FileConfig config;
+    public static final String PERMISSION = "inventories.command";
+    public static final String ADMIN_PERMISSION = "inventories.command.admin";
 
     @Override
     public void onEnable()

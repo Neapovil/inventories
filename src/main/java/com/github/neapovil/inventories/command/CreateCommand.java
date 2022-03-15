@@ -14,8 +14,8 @@ public final class CreateCommand
     public static final void register()
     {
         new CommandAPICommand("inventories")
-                .withPermission("inventories.command")
-                .withArguments(new LiteralArgument("create").withPermission("inventories.command.admin"))
+                .withPermission(Inventories.PERMISSION)
+                .withArguments(new LiteralArgument("create").withPermission(Inventories.ADMIN_PERMISSION))
                 .withArguments(new StringArgument("name"))
                 .executesPlayer((player, args) -> {
                     final String name = (String) args[0];
