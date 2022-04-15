@@ -106,6 +106,11 @@ public final class Inventories extends JavaPlugin implements Listener
         return inv.entrySet().stream().map(i -> i.getKey()).toList();
     }
 
+    public String[] getInventoriesAsStrings()
+    {
+        return this.getInventories().toArray(String[]::new);
+    }
+
     @EventHandler
     private void playerInteract(PlayerInteractEvent event)
     {

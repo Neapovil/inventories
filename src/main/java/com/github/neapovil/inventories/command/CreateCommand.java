@@ -22,7 +22,7 @@ public final class CreateCommand
 
                     if (plugin.exists(name))
                     {
-                        CommandAPI.fail("An inventory with this name already exist.");
+                        throw CommandAPI.fail("An inventory with this name already exist.");
                     }
 
                     plugin.createInventory(name, player.getInventory());

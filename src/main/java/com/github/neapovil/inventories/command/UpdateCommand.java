@@ -4,6 +4,7 @@ import com.github.neapovil.inventories.Inventories;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 
@@ -16,7 +17,7 @@ public final class UpdateCommand
         new CommandAPICommand("inventories")
                 .withPermission(Inventories.PERMISSION)
                 .withArguments(new LiteralArgument("update").withPermission(Inventories.ADMIN_PERMISSION))
-                .withArguments(new StringArgument("name").replaceSuggestions(info -> plugin.getInventories().toArray(String[]::new)))
+                .withArguments(new StringArgument("name").replaceSuggestions(ArgumentSuggestions.strings(info -> plugin.getInventoriesAsStrings())))
                 .executesPlayer((player, args) -> {
                     final String name = (String) args[0];
 
