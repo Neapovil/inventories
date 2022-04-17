@@ -15,7 +15,7 @@ public final class DeleteCommand
     public static final void register()
     {
         new CommandAPICommand("inventories")
-                .withPermission(Inventories.PERMISSION)
+                .withPermission(Inventories.USER_PERMISSION)
                 .withArguments(new LiteralArgument("delete").withPermission(Inventories.ADMIN_PERMISSION))
                 .withArguments(new StringArgument("name").replaceSuggestions(ArgumentSuggestions.strings(info -> plugin.getInventoriesAsStrings())))
                 .executes((sender, args) -> {

@@ -18,7 +18,7 @@ public final class GiveCommand
     public static final void register()
     {
         new CommandAPICommand("inventories")
-                .withPermission(Inventories.PERMISSION)
+                .withPermission(Inventories.USER_PERMISSION)
                 .withArguments(new LiteralArgument("give").withPermission(Inventories.ADMIN_PERMISSION))
                 .withArguments(new PlayerArgument("player"))
                 .withArguments(new StringArgument("name").replaceSuggestions(ArgumentSuggestions.strings(info -> plugin.getInventoriesAsStrings())))

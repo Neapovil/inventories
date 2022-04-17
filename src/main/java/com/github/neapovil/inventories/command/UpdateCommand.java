@@ -15,7 +15,7 @@ public final class UpdateCommand
     public static final void register()
     {
         new CommandAPICommand("inventories")
-                .withPermission(Inventories.PERMISSION)
+                .withPermission(Inventories.USER_PERMISSION)
                 .withArguments(new LiteralArgument("update").withPermission(Inventories.ADMIN_PERMISSION))
                 .withArguments(new StringArgument("name").replaceSuggestions(ArgumentSuggestions.strings(info -> plugin.getInventoriesAsStrings())))
                 .executesPlayer((player, args) -> {

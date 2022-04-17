@@ -15,7 +15,7 @@ public final class GetCommand
     public static final void register()
     {
         new CommandAPICommand("inventories")
-                .withPermission(Inventories.PERMISSION)
+                .withPermission(Inventories.USER_PERMISSION)
                 .withArguments(new LiteralArgument("get"))
                 .withArguments(new StringArgument("name").replaceSuggestions(ArgumentSuggestions.strings(info -> plugin.getInventoriesAsStrings())))
                 .executesPlayer((player, args) -> {
