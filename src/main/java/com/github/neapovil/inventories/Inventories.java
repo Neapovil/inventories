@@ -1,41 +1,34 @@
 package com.github.neapovil.inventories;
 
-import java.io.File;
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Optional;
 
 import org.bukkit.attribute.Attribute;
-import org.bukkit.block.data.type.Sign;
-import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.electronwill.nightconfig.core.Config;
-import com.electronwill.nightconfig.core.file.FileConfig;
 import com.github.neapovil.inventories.command.CreateCommand;
 import com.github.neapovil.inventories.command.DeleteCommand;
 import com.github.neapovil.inventories.command.GetCommand;
 import com.github.neapovil.inventories.command.GiveCommand;
 import com.github.neapovil.inventories.command.UpdateCommand;
-import com.github.neapovil.inventories.util.SerializeInventory;
+import com.github.neapovil.inventories.gson.InventoriesObject;
+import com.github.neapovil.inventories.gson.InventoriesObject.Inventory;
+import com.github.neapovil.inventories.listener.SignListener;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.md_5.bungee.api.ChatColor;
-
-public final class Inventories extends JavaPlugin implements Listener
+public final class Inventories extends JavaPlugin
 {
     private static Inventories instance;
-    private FileConfig config;
     public static final String USER_PERMISSION = "inventories.command";
     public static final String ADMIN_PERMISSION = "inventories.command.admin";
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private InventoriesObject inventoriesObject;
 
     @Override
     public void onEnable()
@@ -44,19 +37,22 @@ public final class Inventories extends JavaPlugin implements Listener
 
         this.saveResource("inventories.json", false);
 
-        this.config = FileConfig.builder(new File(this.getDataFolder(), "inventories.json"))
-                .autoreload()
-                .autosave()
-                .build();
-        this.config.load();
+        try
+        {
+            this.load();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
 
-        CreateCommand.register();
-        GetCommand.register();
-        DeleteCommand.register();
-        GiveCommand.register();
-        UpdateCommand.register();
+        new CreateCommand().register();
+        new GetCommand().register();
+        new DeleteCommand().register();
+        new GiveCommand().register();
+        new UpdateCommand().register();
 
-        this.getServer().getPluginManager().registerEvents(this, this);
+        this.getServer().getPluginManager().registerEvents(new SignListener(), this);
     }
 
     @Override
@@ -64,109 +60,78 @@ public final class Inventories extends JavaPlugin implements Listener
     {
     }
 
-    public static Inventories getInstance()
+    public static Inventories instance()
     {
         return instance;
     }
 
-    public boolean exists(String name)
+    public void load() throws IOException
     {
-        return this.config.get("inventories." + name) != null;
+        final String string = Files.readString(this.getDataFolder().toPath().resolve("inventories.json"));
+        this.inventoriesObject = this.gson.fromJson(string, InventoriesObject.class);
     }
 
-    public void createInventory(String name, PlayerInventory playerInventory)
+    public void save() throws IOException
     {
-        this.config.set("inventories." + name + ".inventory", SerializeInventory.playerInventoryToBase64(playerInventory));
+        final String string = this.gson.toJson(this.inventoriesObject);
+        Files.write(this.getDataFolder().toPath().resolve("inventories.json"), string.getBytes());
     }
 
-    public void setInventory(String name, Player player)
+    public Optional<Inventory> find(String name)
+    {
+        return this.inventoriesObject.inventories.stream().filter(i -> i.name.equalsIgnoreCase(name)).findFirst();
+    }
+
+    public void create(String name, PlayerInventory playerInventory) throws IOException
+    {
+        final InventoriesObject.Inventory inventory = new InventoriesObject.Inventory();
+
+        inventory.items.addAll(Arrays.asList(playerInventory.getContents()));
+        inventory.name = name;
+
+        this.inventoriesObject.inventories.removeIf(i -> i.name.equalsIgnoreCase(name));
+        this.inventoriesObject.inventories.add(inventory);
+
+        this.save();
+        this.load();
+    }
+
+    public void set(String name, Player player)
+    {
+        this.find(name).ifPresent(i -> this.set(i, player));
+    }
+
+    public void set(Inventory inventory, Player player)
     {
         player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
         player.getActivePotionEffects().forEach(e -> player.removePotionEffect(e.getType()));
-
-        try
-        {
-            player.getInventory().setContents(SerializeInventory.itemStackArrayFromBase64(this.config.get("inventories." + name + ".inventory")));
-        }
-        catch (Exception e)
-        {
-            player.sendMessage(ChatColor.RED + "Unable to set inventory.");
-            this.getLogger().severe(e.getMessage());
-        }
+        player.getInventory().setContents(inventory.items.toArray(ItemStack[]::new));
     }
 
-    public void deleteInventory(String name)
+    public boolean delete(String name) throws IOException
     {
-        this.config.remove("inventories." + name);
+        final boolean removed = this.inventoriesObject.inventories.removeIf(i -> i.name.equalsIgnoreCase(name));
+
+        if (removed)
+        {
+            this.save();
+        }
+
+        return removed;
     }
 
-    public List<String> getInventories()
+    public boolean exists(String name)
     {
-        final Config inv = this.config.get("inventories");
-        return inv.entrySet().stream().map(i -> i.getKey()).toList();
+        return this.inventoriesObject.inventories.stream().anyMatch(i -> i.name.equalsIgnoreCase(name));
     }
 
-    public String[] getInventoriesAsStrings()
+    public String[] suggestions()
     {
-        return this.getInventories().toArray(String[]::new);
+        return this.inventoriesObject.inventories.stream().map(i -> i.name).toArray(String[]::new);
     }
 
-    @EventHandler
-    private void playerInteract(PlayerInteractEvent event)
+    public InventoriesObject inventories()
     {
-        if (event.getClickedBlock() == null)
-        {
-            return;
-        }
-
-        if (!(event.getClickedBlock().getBlockData() instanceof Sign || event.getClickedBlock().getBlockData() instanceof WallSign))
-        {
-            return;
-        }
-
-        if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK))
-        {
-            return;
-        }
-
-        final org.bukkit.block.Sign sign = (org.bukkit.block.Sign) event.getClickedBlock().getState();
-
-        if (!((TextComponent) sign.line(0)).content().startsWith("[Inventories]"))
-        {
-            return;
-        }
-
-        final String name = ((TextComponent) sign.line(1)).content();
-
-        this.setInventory(name, event.getPlayer());
-
-        event.getPlayer().sendMessage("Set own inventory to " + name);
-    }
-
-    @EventHandler
-    public void signChange(SignChangeEvent event)
-    {
-        if (!((TextComponent) event.line(0)).content().equalsIgnoreCase("[Inventories]"))
-        {
-            return;
-        }
-
-        final String name = ((TextComponent) event.line(1)).content();
-
-        if (name.isBlank())
-        {
-            event.getPlayer().sendMessage(ChatColor.RED + "You must type the inventory name on the second line");
-            event.getBlock().breakNaturally();
-            return;
-        }
-
-        if (!this.exists(name))
-        {
-            event.getPlayer().sendMessage(ChatColor.RED + "Inventory " + name + " doesn't exist");
-            event.getBlock().breakNaturally();
-            return;
-        }
-
-        event.line(0, Component.text("[Inventories]", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD));
+        return this.inventoriesObject;
     }
 }

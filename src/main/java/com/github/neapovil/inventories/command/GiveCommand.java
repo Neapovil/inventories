@@ -11,27 +11,27 @@ import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.PlayerArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 
-public final class GiveCommand
+public final class GiveCommand implements ICommand
 {
-    private static final Inventories plugin = Inventories.getInstance();
+    private final Inventories plugin = Inventories.instance();
 
-    public static final void register()
+    public void register()
     {
         new CommandAPICommand("inventories")
                 .withPermission(Inventories.USER_PERMISSION)
                 .withArguments(new LiteralArgument("give").withPermission(Inventories.ADMIN_PERMISSION))
                 .withArguments(new PlayerArgument("player"))
-                .withArguments(new StringArgument("name").replaceSuggestions(ArgumentSuggestions.strings(info -> plugin.getInventoriesAsStrings())))
+                .withArguments(new StringArgument("name").replaceSuggestions(ArgumentSuggestions.strings(info -> plugin.suggestions())))
                 .executesPlayer((player, args) -> {
-                    final Player player1 = (Player) args[0];
-                    final String name = (String) args[1];
+                    final Player player1 = (Player) args.get("player");
+                    final String name = (String) args.get("name");
 
                     if (!plugin.exists(name))
                     {
-                        throw CommandAPI.fail("Inventory " + name + " doesn't exists");
+                        throw CommandAPI.failWithString("Inventory " + name + " doesn't exists");
                     }
 
-                    plugin.setInventory(name, player1);
+                    plugin.set(name, player1);
 
                     player.sendMessage("Gave inventory " + name + " to " + player1.getName());
                 })

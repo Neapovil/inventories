@@ -8,27 +8,27 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 
-public final class GetCommand
+public final class GetCommand implements ICommand
 {
-    private static final Inventories plugin = Inventories.getInstance();
+    private final Inventories plugin = Inventories.instance();
 
-    public static final void register()
+    public void register()
     {
         new CommandAPICommand("inventories")
                 .withPermission(Inventories.USER_PERMISSION)
                 .withArguments(new LiteralArgument("get"))
-                .withArguments(new StringArgument("name").replaceSuggestions(ArgumentSuggestions.strings(info -> plugin.getInventoriesAsStrings())))
+                .withArguments(new StringArgument("name").replaceSuggestions(ArgumentSuggestions.strings(info -> plugin.suggestions())))
                 .executesPlayer((player, args) -> {
-                    final String name = (String) args[0];
+                    final String name = (String) args.get("name");
 
                     if (!plugin.exists(name))
                     {
-                        throw CommandAPI.fail("Inventory " + name + " doesn't exists.");
+                        throw CommandAPI.failWithString("Inventory " + name + " doesn't exists.");
                     }
 
-                    plugin.setInventory(name, player);
+                    plugin.set(name, player);
 
-                    player.sendMessage("Set own inventory to " + name);
+                    player.sendMessage("Set own inventory to: " + name);
                 })
                 .register();
     }
